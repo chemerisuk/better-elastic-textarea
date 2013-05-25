@@ -10,25 +10,16 @@ DOM.extend("textarea.elastic", {
     constructor: function() {
         var textarea = this,
             wrapper = textarea.next(),
-            pre = wrapper.firstChild(),
-            span = pre.firstChild();
+            holder = wrapper.child(0),
+            span = holder.child(0);
 
         wrapper.append(textarea);
 
-        if (DOM.supports("oninput", "input")) {
-             textarea.on("input", function() {
-                textarea._syncTextarea(span);
-            });
-        } else {
-            // use onpropertychange instead of oninput for old IE
-            textarea.on("propertychange", function(e) {
-                if (e.get("propertyName") === "value") {
-                    textarea._syncTextarea(span);
-                }
-            });
-        }
+        textarea.on("input", function() {
+            textarea._syncTextarea(span);
+        });
 
-        pre.setStyle({
+        holder.setStyle({
             font: textarea.getStyle("font"),
             padding: textarea.getStyle("padding"),
             "border-width": textarea.getStyle("border-width")
@@ -40,14 +31,14 @@ DOM.extend("textarea.elastic", {
 
         textarea._syncTextarea(span);
     },
-    _syncTextarea: function(target, value) {
+    _syncTextarea: function(span, value) {
         if (value === undefined) value = this.get();
 
         // use &nbsp; to fix issue with adding a new line
         if (value[value.length - 1] === "\n") value += "&nbsp;";
         
         // IE doesn't respect newlines so use <br> instead
-        target.set(value.split("\n").join("<br>"));
+        span.set(value.split("\n").join("<br>"));
     }
 });
 
