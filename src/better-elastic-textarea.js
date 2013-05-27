@@ -6,7 +6,7 @@
  */
 DOM.extend("textarea.elastic", {
     after: "div[style=position:relative]>pre[style=visibility:hidden;margin:0;border-style:solid]>span[style=display:inline-block;white-space:pre-wrap]"
-    }, {
+}, {
     constructor: function() {
         var textarea = this,
             wrapper = textarea.next(),
@@ -15,24 +15,19 @@ DOM.extend("textarea.elastic", {
 
         wrapper.append(textarea);
 
-        textarea.on("input", function() {
-            textarea._syncTextarea(span);
-        });
-
         holder.setStyle({
             font: textarea.getStyle("font"),
             padding: textarea.getStyle("padding"),
             "border-width": textarea.getStyle("border-width")
         });
 
-        textarea.parent("form").on("reset", function() {
-            textarea._syncTextarea(span, textarea.get("defaultValue"));
-        });
+        textarea.on("input", textarea._syncWithHolder, [span]);
+        textarea._syncWithHolder(span);
 
-        textarea._syncTextarea(span);
+        textarea.parent("form").on("reset", textarea._syncWithHolder, [span, true], textarea);
     },
-    _syncTextarea: function(span, value) {
-        if (value === undefined) value = this.get();
+    _syncWithHolder: function(span, defaultValue) {
+        value = this.get(defaultValue ? "defaultValue" : "value");
 
         // use &nbsp; to fix issue with adding a new line
         if (value[value.length - 1] === "\n") value += "&nbsp;";
