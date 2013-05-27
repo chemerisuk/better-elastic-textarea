@@ -15,24 +15,19 @@ DOM.extend("textarea.elastic", {
 
         wrapper.append(textarea);
 
-        textarea.on("input", function() {
-            textarea._syncTextarea(span);
-        });
-
         holder.setStyle({
             font: textarea.getStyle("font"),
             padding: textarea.getStyle("padding"),
             "border-width": textarea.getStyle("border-width")
         });
 
-        textarea.parent("form").on("reset", function() {
-            textarea._syncWithHolder(span, textarea.get("defaultValue"));
-        });
-
+        textarea.on("input", textarea._syncWithHolder, [span]);
         textarea._syncWithHolder(span);
+
+        textarea.parent("form").on("reset", textarea._syncWithHolder, [span, true], textarea);
     },
-    _syncWithHolder: function(span, value) {
-        if (value === undefined) value = this.get();
+    _syncWithHolder: function(span, defaultValue) {
+        value = this.get(defaultValue ? "defaultValue" : "value");
 
         // use &nbsp; to fix issue with adding a new line
         if (value[value.length - 1] === "\n") value += "&nbsp;";
