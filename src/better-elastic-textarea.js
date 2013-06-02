@@ -5,26 +5,25 @@
  * Copyright (c) 2013 Maksim Chemerisuk
  */
 DOM.extend("textarea.elastic", {
-    after: "div[style=position:relative]>pre[style=visibility:hidden;margin:0;border-style:solid]>span[style=display:inline-block;white-space:pre-wrap]"
+    wrapper: "div[style=position:relative]>pre[style=visibility:hidden;margin:0;border-style:solid]>span[style=display:inline-block;white-space:pre-wrap]"
 }, {
-    constructor: function() {
-        var textarea = this,
-            wrapper = textarea.next(),
+    constructor: function(tpl) {
+        var wrapper = tpl.wrapper,
             holder = wrapper.child(0),
             span = holder.child(0);
 
-        wrapper.append(textarea);
-
         holder.setStyle({
-            font: textarea.getStyle("font"),
-            padding: textarea.getStyle("padding"),
-            "border-width": textarea.getStyle("border-width")
+            font: this.getStyle("font"),
+            padding: this.getStyle("padding"),
+            "border-width": this.getStyle("border-width")
         });
 
-        textarea.on("input", textarea._syncWithHolder, [span]);
-        textarea._syncWithHolder(span);
+        this.on("input", this._syncWithHolder, [span]);
+        this._syncWithHolder(span);
 
-        textarea.parent("form").on("reset", textarea._syncWithHolder, [span, true], textarea);
+        this.parent("form").on("reset", this._syncWithHolder, [span, true], this);
+
+        wrapper.append(this.after(wrapper));
     },
     _syncWithHolder: function(span, defaultValue) {
         value = this.get(defaultValue ? "defaultValue" : "value");
