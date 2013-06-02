@@ -6,7 +6,8 @@
 
     <title>better-elastic-textarea demo</title>
 
-    <script src="components/better-dom/src/better-dom.js" data-htc="components/better-dom/src/better-dom.htc"></script>
+    <script src="components/lodash/lodash.js"></script>
+    <script src="components/better-dom/better-dom.js" data-htc="components/better-dom/better-dom.htc"></script>
     <script src="src/better-elastic-textarea.js"></script>
     <style type="text/css">
     textarea {
@@ -19,16 +20,6 @@
     </style>
 </head>
 <body>
-    <script type="text/template" id="template">
-        <form action="" style="width: 300px">
-            <textarea class="elastic"></textarea>
-            <button type="submit">Submit</button>
-            <button type="reset">Reset</button>
-        </form>
-    </script>
-    <button onclick='DOM.find("body").append(DOM.find("#template").get())'>
-        Append new form
-    </button>
     <form action="" style="width: 300px">
         <p>This textarea automatically expands to contain all text</p>
         <textarea class="elastic"></textarea>

@@ -5,14 +5,12 @@
  * Copyright (c) 2013 Maksim Chemerisuk
  */
 DOM.extend("textarea.elastic", {
-    after: "div[style=position:relative]>pre[style=visibility:hidden;margin:0;border-style:solid]>span[style=display:inline-block;white-space:pre-wrap]"
+    wrapper: "div[style=position:relative]>pre[style=visibility:hidden;margin:0;border-style:solid]>span[style=display:inline-block;white-space:pre-wrap]"
 }, {
-    constructor: function() {
-        var wrapper = this.next(),
+    constructor: function(tpl) {
+        var wrapper = tpl.wrapper,
             holder = wrapper.child(0),
             span = holder.child(0);
-
-        wrapper.append(this);
 
         holder.setStyle({
             font: this.getStyle("font"),
@@ -24,6 +22,8 @@ DOM.extend("textarea.elastic", {
         this._syncWithHolder(span);
 
         this.parent("form").on("reset", this._syncWithHolder, [span, true], this);
+
+        wrapper.append(this.after(wrapper));
     },
     _syncWithHolder: function(span, defaultValue) {
         value = this.get(defaultValue ? "defaultValue" : "value");
