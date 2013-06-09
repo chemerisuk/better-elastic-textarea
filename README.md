@@ -19,7 +19,6 @@ Then append the following script on your page:
 </head>
 <body>
     ...
-    <script src="components/lodash/lodash.js"></script>
     <script src="components/better-dom/better-dom.js" data-htc="components/better-dom/better-dom.htc"></script>
     <script src="components/better-elastic-textarea/src/better-elastic-textarea.js"></script>
 </body>

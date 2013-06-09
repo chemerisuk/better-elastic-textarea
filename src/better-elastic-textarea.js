@@ -4,24 +4,22 @@
  *
  * Copyright (c) 2013 Maksim Chemerisuk
  */
-DOM.extend("textarea.elastic", {
-    wrapper: "div[style=position:relative]>pre[style=visibility:hidden;margin:0;border-style:solid]>span[style=display:inline-block;white-space:pre-wrap]"
-}, {
-    constructor: function(tpl) {
-        var wrapper = tpl.wrapper,
-            holder = wrapper.child(0),
+DOM.extend("textarea.elastic", [
+    "div[style=position:relative]>pre[style=visibility:hidden;margin:0;border-style:solid]>span[style=display:inline-block;white-space:pre-wrap]"
+], {
+    constructor: function(wrapper) {
+        var holder = wrapper.child(0),
             span = holder.child(0);
 
-        holder.setStyle({
-            font: this.getStyle("font"),
-            padding: this.getStyle("padding"),
-            "border-width": this.getStyle("border-width")
-        });
-
-        this.on("input", this._syncWithHolder, [span]);
-        this._syncWithHolder(span);
+        this.on("input", this._syncWithHolder, [span])._syncWithHolder(span);
 
         this.parent("form").on("reset", this._syncWithHolder, [span, true], this);
+
+        holder.setStyle({
+            "font": this.getStyle("font"),
+            "padding": this.getStyle("padding"),
+            "border-width": this.getStyle("border-width")
+        });
 
         wrapper.append(this.after(wrapper));
     },
