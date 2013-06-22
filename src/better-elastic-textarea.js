@@ -11,9 +11,10 @@ DOM.extend("textarea.elastic", [
         var holder = wrapper.child(0),
             span = holder.child(0);
 
-        this.on("input", this._syncWithHolder, [span])._syncWithHolder(span);
+        this.on("input", this, "_syncWithHolder", [span]);
+        this._syncWithHolder(span);
 
-        this.parent("form").on("reset", this._syncWithHolder, [span, true], this);
+        this.parent("form").on("reset", this, "_syncWithHolder", [span, true]);
 
         holder.setStyle({
             "font": this.getStyle("font"),
