@@ -1,6 +1,6 @@
 better-elastic-textarea
 =======================
-elastic textarea for [better-dom](https://github.com/chemerisuk/better-dom)
+> Elastic textarea for [better-dom](https://github.com/chemerisuk/better-dom)
 
 Installing
 ----------
@@ -8,7 +8,7 @@ Use [bower](http://bower.io/) to download this extension with all required depen
 
     bower install better-elastic-textarea
 
-This will clone the latest version of the better-dateinput-polyfill into the `components` directory at the root of your project.
+This will clone the latest version of the better-dateinput-polyfill into the `bower_components` directory at the root of your project.
 
 Then append the following script on your page:
 
@@ -19,8 +19,8 @@ Then append the following script on your page:
 </head>
 <body>
     ...
-    <script src="components/better-dom/better-dom.js" data-htc="components/better-dom/better-dom.htc"></script>
-    <script src="components/better-elastic-textarea/src/better-elastic-textarea.js"></script>
+    <script src="bower_components/better-dom/better-dom.js" data-htc="bower_components/better-dom/better-dom.htc"></script>
+    <script src="bower_components/better-elastic-textarea/src/better-elastic-textarea.js"></script>
 </body>
 </html>
 ```
