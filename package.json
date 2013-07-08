@@ -1,7 +1,7 @@
 {
     "name": "better-elastic-textarea",
     "description": "Elastic textarea for better-dom",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "author": "Maksim Chemerisuk",
     "license": "MIT",
     "repository": {

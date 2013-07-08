@@ -1,6 +1,6 @@
 {
     "name": "better-elastic-textarea",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "main": [
         "better-elastic-textarea.js"
     ],
