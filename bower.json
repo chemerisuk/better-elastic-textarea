@@ -1,18 +1,18 @@
 {
     "name": "better-elastic-textarea",
-    "description": "elastic textarea for better-dom",
     "version": "1.0.4",
     "main": [
-        "src/better-elastic-textarea.js"
+        "better-elastic-textarea.js"
+    ],
+    "ignore": [
+        ".*",
+        "src",
+        "test"
     ],
     "keywords": [
         "better-dom"
     ],
     "dependencies": {
-        "better-dom": "~1.0.0"
-    },
-    "ignore": [
-        "*.*",
-        "test"
-    ]
+        "better-dom": "~1.1.0"
+    }
 }

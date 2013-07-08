@@ -1,9 +1,9 @@
 .DS_Store
+*.sublime-workspace
 node_modules
 bower_components
 dist
 coverage
 *.log
-reports
 .grunt
 _SpecRunner.html
