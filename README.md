@@ -1,4 +1,4 @@
-better-elastic-textarea
+better-elastic-textarea [![Build Status](https://api.travis-ci.org/chemerisuk/better-elastic-textarea.png?branch=master)](http://travis-ci.org/chemerisuk/better-elastic-textarea)
 =======================
 > Elastic textarea for [better-dom](https://github.com/chemerisuk/better-dom)
 
