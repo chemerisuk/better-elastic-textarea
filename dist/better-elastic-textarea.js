@@ -34,7 +34,7 @@
 
             // use &nbsp; to fix issue with adding a new line
             if (value[value.length - 1] === "\n") value += "&nbsp;";
-            
+
             // IE doesn't respect newlines so use <br> instead
             span.set(value.split("\n").join("<br>"));
         }
@@ -50,5 +50,5 @@
         resize: "none",
         "box-sizing": "border-box"
     });
-    
+
 }(window.DOM));
