@@ -1,54 +1,37 @@
-/**
- * @file <%= pkg.name %>.js
- * @version <%= pkg.version %> <%= grunt.template.today('isoDateTime') %>
- * @overview <%= pkg.description %>
- * @copyright <%= pkg.author %> <%= grunt.template.today('yyyy') %>
- * @license <%= pkg.license %>
- * @see <%= pkg.repository.url %>
- */
 (function(DOM) {
     "use strict";
 
-    DOM.extend("textarea.elastic", [
-        "div[style=position:relative]>pre[style=visibility:hidden;margin:0;border-style:solid]>span[style=display:inline-block;white-space:pre-wrap]"
-    ], {
-        constructor: function(wrapper) {
-            var holder = wrapper.child(0),
-                span = holder.child(0);
+    var SPACE_HOLDER_KEY = "space-holder";
 
-            this.on("input", this, "_syncWithHolder", [span]);
-            this._syncWithHolder(span);
-
-            this.parent("form").on("reset", this, "_syncWithHolder", [span, true]);
-
-            holder.setStyle({
-                "font": this.getStyle("font"),
-                "padding": this.getStyle("padding"),
-                "border-width": this.getStyle("border-width")
+    DOM.extend("textarea[rows='1']", {
+        constructor: function() {
+            var wrapper = DOM.create("div.better-elastic-textarea>pre[style=\"font:${font};padding:${pad};border-width:${bw}\"]>span", {
+                font: this.style("font"),
+                pad: this.style("padding"),
+                bw: this.style("border-width")
             });
 
-            wrapper.append(this.after(wrapper));
+            this
+                .data(SPACE_HOLDER_KEY, wrapper.find("span"))
+                .on("input", "handleInput");
+
+            this.parent("form").on("reset", this, "handleFormReset");
+
+            wrapper.append(this.after(wrapper).set("rows", null));
         },
-        _syncWithHolder: function(span, defaultValue) {
-            var value = this.get(defaultValue ? "defaultValue" : "value");
+        handleInput: function(value) {
+            // use a small trick here: type of the first
+            // argument is string only when we send defaultValue
+            if (typeof value !== "string") value = this.get();
 
             // use &nbsp; to fix issue with adding a new line
             if (value[value.length - 1] === "\n") value += "&nbsp;";
-            
+
             // IE doesn't respect newlines so use <br> instead
-            span.set(value.split("\n").join("<br>"));
+            this.data(SPACE_HOLDER_KEY).set(value.split("\n").join("<br>"));
+        },
+        handleFormReset: function() {
+            this.fire("input", this.get("defaultValue"));
         }
     });
-
-    DOM.importStyles("textarea.elastic", {
-        position: "absolute",
-        left: 0,
-        top: 0,
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        resize: "none",
-        "box-sizing": "border-box"
-    });
-    
 }(window.DOM));
