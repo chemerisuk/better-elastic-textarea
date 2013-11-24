@@ -1,24 +1,23 @@
 {
-    "name": "better-elastic-textarea",
-    "description": "Elastic textarea for better-dom",
-    "version": "1.0.5",
-    "author": "Maksim Chemerisuk",
-    "license": "MIT",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/chemerisuk/better-elastic-textarea"
-    },
-    "scripts": {
-        "test": "grunt test"
-    },
-    "devDependencies": {
-        "grunt": "0.4.1",
-        "grunt-contrib-jasmine": "0.5.1",
-        "grunt-contrib-jshint": "0.5.4",
-        "grunt-contrib-watch": "0.4.3",
-        "grunt-contrib-clean": "0.4.1",
-        "grunt-contrib-copy": "0.4.1",
-        "grunt-template-jasmine-istanbul": "0.2.4",
-        "grunt-shell": "0.2.2"
-    }
+  "name": "better-elastic-textarea",
+  "description": "Elastic textarea for better-dom",
+  "version": "1.1.0-rc.1",
+  "author": "Maksim Chemerisuk",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chemerisuk/better-elastic-textarea"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "0.4.1",
+    "grunt-contrib-jshint": "0.5.4",
+    "grunt-contrib-watch": "0.4.3",
+    "grunt-karma": "0.7.1",
+    "karma-coverage": "0.1.0",
+    "grunt-github-publish": "~0.1.1",
+    "grunt-shell": "~0.6.0"
+  }
 }

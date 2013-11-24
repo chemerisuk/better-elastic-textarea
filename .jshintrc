@@ -1,6 +1,8 @@
 {
     "browser": true,
     "onevar": true,
+    "evil": true,
+    "eqnull": true,
 
     "quotmark": "double",
     "indent": 4,
@@ -14,7 +16,9 @@
     "immed": true,
     "latedef": true,
     "nonew": true,
-    
+    "lastsemic": true,
+    "strict": true,
+
     "globals": {
         "DOM": true,
         "module": true,
@@ -28,7 +32,7 @@
         "expect": true,
         "setFixtures": true,
         "jasmine": true,
-        "waits": true,
+        "waitsFor": true,
         "runs": true,
         "spyOn": true
     }

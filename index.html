@@ -14,15 +14,20 @@
         line-height: 1.5;
     }
     </style>
+    <!--[if IE]>
+        <link href="bower_components/better-dom/dist/better-dom.htc" rel="htc" />
+        <script src="bower_components/html5shiv/dist/html5shiv.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="src/better-elastic-textarea.css">
 </head>
 <body>
     <form action="" style="width: 300px">
         <p>This textarea automatically expands to contain all text</p>
-        <textarea class="elastic"></textarea>
+        <textarea rows="1">abc</textarea>
         <button type="submit">Submit</button>
         <button type="reset">Reset</button>
     </form>
-    <script src="bower_components/better-dom/better-dom.js" data-htc="bower_components/better-dom/better-dom.htc"></script>
+    <script src="bower_components/better-dom/dist/better-dom.js"></script>
     <script src="src/better-elastic-textarea.js"></script>
 </body>
 </html>
