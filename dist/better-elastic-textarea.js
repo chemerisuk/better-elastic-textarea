@@ -1,6 +1,6 @@
 /**
  * @file src/better-elastic-textarea.js
- * @version 1.1.0-rc.1 2013-11-24T17:45:49
+ * @version 1.1.0-rc.3 2013-11-24T18:10:01
  * @overview Elastic textarea for better-dom
  * @copyright Maksim Chemerisuk 2013
  * @license MIT
