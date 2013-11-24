@@ -1,6 +1,6 @@
 /**
- * @file better-elastic-textarea.js
- * @version 1.0.5 2013-07-08T11:35:18
+ * @file src/better-elastic-textarea.js
+ * @version 1.1.0-rc.1 2013-11-24T17:45:49
  * @overview Elastic textarea for better-dom
  * @copyright Maksim Chemerisuk 2013
  * @license MIT
@@ -9,46 +9,42 @@
 (function(DOM) {
     "use strict";
 
-    DOM.extend("textarea.elastic", [
-        "div[style=position:relative]>pre[style=visibility:hidden;margin:0;border-style:solid]>span[style=display:inline-block;white-space:pre-wrap]"
-    ], {
-        constructor: function(wrapper) {
-            var holder = wrapper.child(0),
-                span = holder.child(0);
+    var SPACE_HOLDER_KEY = "space-holder";
 
-            this.on("input", this, "_syncWithHolder", [span]);
-            this._syncWithHolder(span);
+    // Insiped by article at a list apart:
+    // http://alistapart.com/article/expanding-text-areas-made-elegant
 
-            this.parent("form").on("reset", this, "_syncWithHolder", [span, true]);
+    DOM.extend("textarea[rows='1']", {
+        constructor: function() {
+            var wrapper = DOM.create("div.better-elastic-textarea>pre>span");
 
-            holder.setStyle({
-                "font": this.getStyle("font"),
-                "padding": this.getStyle("padding"),
-                "border-width": this.getStyle("border-width")
+            this
+                .data(SPACE_HOLDER_KEY, wrapper.find("span"))
+                .on("input", this.onTextareaInput);
+
+            this.parent("form").on("reset", this, this.onFormReset);
+
+            wrapper.child(0).style({
+                font: this.style("font"),
+                padding: this.style("padding"),
+                "border-width": this.style("border-width")
             });
 
             wrapper.append(this.after(wrapper));
         },
-        _syncWithHolder: function(span, defaultValue) {
-            var value = this.get(defaultValue ? "defaultValue" : "value");
+        onTextareaInput: function(value) {
+            // use a small trick here: type of the first argument
+            // is string only when defaultValue is sent in handleFormReset
+            if (typeof value !== "string") value = this.get();
 
             // use &nbsp; to fix issue with adding a new line
             if (value[value.length - 1] === "\n") value += "&nbsp;";
 
             // IE doesn't respect newlines so use <br> instead
-            span.set(value.split("\n").join("<br>"));
+            this.data(SPACE_HOLDER_KEY).set(value.split("\n").join("<br>"));
+        },
+        onFormReset: function() {
+            this.fire("input", this.get("defaultValue"));
         }
     });
-
-    DOM.importStyles("textarea.elastic", {
-        position: "absolute",
-        left: 0,
-        top: 0,
-        width: "100%",
-        height: "100%",
-        overflow: "hidden",
-        resize: "none",
-        "box-sizing": "border-box"
-    });
-
 }(window.DOM));
