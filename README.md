@@ -4,6 +4,11 @@ better-elastic-textarea [![Build Status](https://api.travis-ci.org/chemerisuk/be
 
 [VIEW DEMO](http://chemerisuk.github.io/better-elastic-textarea/)
 
+Features
+--------
+* all `textarea[rows='1']` elements expand on any king of content insertion: manually or from clipboard
+* [living extension](https://github.com/chemerisuk/better-dom/wiki/Living-extensions) - no init calls are required for a new content
+
 Installing
 ----------
 Use [bower](http://bower.io/) to download this extension with all required dependencies.
