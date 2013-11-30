@@ -2,6 +2,10 @@ textarea[rows="1"] {
     display: block;
     width: 100%;
     resize: none;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .better-elastic-textarea {
@@ -14,10 +18,7 @@ textarea[rows="1"] {
     top: 0;
     height: 100%;
     overflow: hidden;
-
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+    margin: 0;
 }
 
 .better-elastic-textarea > pre {

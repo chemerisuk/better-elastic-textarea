@@ -18,6 +18,7 @@
 
             wrapper.child(0).style({
                 font: this.style("font"),
+                margin: this.style("margin"),
                 padding: this.style("padding"),
                 "border-width": this.style("border-width")
             });
