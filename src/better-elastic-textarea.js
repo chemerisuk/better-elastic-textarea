@@ -1,7 +1,5 @@
-(function(DOM) {
+(function(DOM, SPACE_HOLDER_KEY) {
     "use strict";
-
-    var SPACE_HOLDER_KEY = "space-holder";
 
     // Insiped by article at a list apart:
     // http://alistapart.com/article/expanding-text-areas-made-elegant
@@ -39,4 +37,4 @@
             this.fire("input", this.get("defaultValue"));
         }
     });
-}(window.DOM));
+}(window.DOM, "space-holder"));

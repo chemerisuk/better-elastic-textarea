@@ -1,16 +1,13 @@
-better-elastic-textarea [![Build Status](https://api.travis-ci.org/chemerisuk/better-elastic-textarea.png?branch=master)](http://travis-ci.org/chemerisuk/better-elastic-textarea)
-=======================
+# better-elastic-textarea [![Build Status](https://api.travis-ci.org/chemerisuk/better-elastic-textarea.png?branch=master)](http://travis-ci.org/chemerisuk/better-elastic-textarea)
 > Elastic textarea for [better-dom](https://github.com/chemerisuk/better-dom)
 
 [VIEW DEMO](http://chemerisuk.github.io/better-elastic-textarea/)
 
-Features
---------
+## Features
 * all `textarea[rows='1']` elements expand on any king of content insertion: manually or from clipboard
 * [live extension](https://github.com/chemerisuk/better-dom/wiki/Live-extensions) - works for current and future content
 
-Installing
-----------
+## Installing
 Use [bower](http://bower.io/) to download this extension with all required dependencies.
 
     bower install better-elastic-textarea --save
@@ -35,3 +32,10 @@ Then append the following script on your page:
 </body>
 </html>
 ```
+
+## Browser support
+* Chrome
+* Safari 5.2.2+
+* Firefox 16+
+* Opera 12.10+
+* IE8+
