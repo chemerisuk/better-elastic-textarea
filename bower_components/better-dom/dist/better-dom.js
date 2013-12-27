@@ -1,6 +1,6 @@
 /**
- * @file better-dom
- * @version 1.6.0 2013-11-28T15:12:35
+ * @file better-dom.js
+ * @version 1.6.4 2013-12-25T18:37:40
  * @overview Live extension playground
  * @copyright Maksim Chemerisuk 2013
  * @license MIT
@@ -58,7 +58,8 @@ var _ = require("./utils"),
     makeExtHandler = function(e, node) {
         var type = e.type,
             el = $Element(node),
-            accepted = e._done || {};
+            accepted = e._done || {},
+            delay = 0;
 
         return function(ext, index) {
             // skip previously excluded or mismatched elements
@@ -68,27 +69,26 @@ var _ = require("./utils"),
                 } else {
                     node.attachEvent("on" + type, ext.stop);
                 }
-                // return true to reduce number of unnecessary iterations
-                return !ext(el);
+                // IMPORTANT: delay helps to use right extension order
+                setTimeout(function() { ext(el) }, delay++);
             }
         };
     },
-    animId, cssPrefix, link, styles;
+    animId, link, styles;
 
 if (features.CSS3_ANIMATIONS) {
     animId = "DOM" + new Date().getTime();
-    cssPrefix = window.WebKitAnimationEvent ? "-webkit-" : "";
 
-    DOM.importStyles("@" + cssPrefix + "keyframes " + animId, "1% {opacity: .99}");
+    DOM.importStyles("@" + features.WEBKIT_PREFIX + "keyframes " + animId, "1% {opacity: .99}");
 
     styles = {
         "animation-duration": "1ms !important",
         "animation-name": animId + " !important"
     };
 
-    document.addEventListener(cssPrefix ? "webkitAnimationStart" : "animationstart", function(e) {
+    document.addEventListener(features.WEBKIT_PREFIX ? "webkitAnimationStart" : "animationstart", function(e) {
         if (e.animationName === animId) {
-            _.some(extensions, makeExtHandler(e, e.target));
+            _.forEach(extensions, makeExtHandler(e, e.target));
         }
     }, false);
 } else {
@@ -102,7 +102,7 @@ if (features.CSS3_ANIMATIONS) {
         var e = window.event;
 
         if (e.srcUrn === "dataavailable") {
-            _.some(extensions, makeExtHandler(e, e.srcElement));
+            _.forEach(extensions, makeExtHandler(e, e.srcElement));
         }
     });
 }
@@ -123,7 +123,7 @@ DOM.extend = function(selector, mixins) {
         // extending element prototype
         _.extend($Element.prototype, mixins);
     } else {
-        var eventHandlers = _.filter(_.keys(mixins), function(prop) { return !!reEventHandler.exec(prop) }),
+        var eventHandlers = _.filter(Object.keys(mixins), function(prop) { return !!reEventHandler.exec(prop) }),
             ext = function(el, mock) {
                 _.extend(el, mixins);
 
@@ -155,7 +155,7 @@ DOM.extend = function(selector, mixins) {
 
                 if (features.CSS3_ANIMATIONS) {
                     e = document.createEvent("HTMLEvents");
-                    e.initEvent(cssPrefix ? "webkitAnimationStart" : "animationstart", true, true);
+                    e.initEvent(features.WEBKIT_PREFIX ? "webkitAnimationStart" : "animationstart", true, true);
                     e.animationName = animId;
 
                     node.dispatchEvent(e);
@@ -218,8 +218,8 @@ var _ = require("./utils"),
  * Import global i18n string(s)
  * @memberOf DOM
  * @param {String}         lang    target language
- * @param {String|Object}  key     localized string key or key/value object
- * @param {String}         value   localized string value
+ * @param {String|Object}  key     english string to localize or key/value object
+ * @param {String}         value   localized string
  * @see https://github.com/chemerisuk/better-dom/wiki/Localization
  */
 DOM.importStrings = function(lang, key, value) {
@@ -232,7 +232,7 @@ DOM.importStrings = function(lang, key, value) {
         // empty lang is for internal use only
         if (lang) selector += ":lang(" + lang + ")";
 
-        DOM.importStyles(selector + ":before", content, true);
+        DOM.importStyles(selector + ":before", content, !lang);
     } else if (keyType === "object") {
         _.forOwn(key, function(value, key) { DOM.importStrings(lang, key, value) });
     } else {
@@ -302,7 +302,7 @@ _.forEach(args, function(args) { DOM.importStyles.apply(DOM, args) });
 var $Node = require("./node"),
     DOM = new $Node(document);
 
-DOM.version = "1.6.0";
+DOM.version = "1.6.4";
 
 DOM.importStyles = function() { DOM.importStyles.args.push(arguments) };
 DOM.importStyles.args = [];
@@ -345,40 +345,13 @@ var _ = require("./utils"),
     DOM = require("./dom"),
     features = require("./features"),
     readyCallbacks = [],
-    readyState = document.readyState,
-    isTop, testDiv, scrollIntervalId;
+    readyState = document.readyState;
 
 function pageLoaded() {
     // safely trigger callbacks
-    _.forEach(readyCallbacks, function(callback) { setTimeout(callback, 0) });
+    _.forEach(readyCallbacks, setTimeout);
     // cleanup
     readyCallbacks = null;
-
-    if (scrollIntervalId) clearInterval(scrollIntervalId);
-}
-
-if (features.DOM2_EVENTS) {
-    document.addEventListener("DOMContentLoaded", pageLoaded, false);
-    window.addEventListener("load", pageLoaded, false);
-} else {
-    window.attachEvent("onload", pageLoaded);
-
-    testDiv = document.createElement("div");
-    try {
-        isTop = window.frameElement === null;
-    } catch (e) {}
-
-    // DOMContentLoaded approximation that uses a doScroll, as found by
-    // Diego Perini: http://javascript.nwbox.com/IEContentLoaded/,
-    // but modified by other contributors, including jdalton
-    if (testDiv.doScroll && isTop && window.external) {
-        scrollIntervalId = setInterval(function () {
-            try {
-                testDiv.doScroll();
-                pageLoaded();
-            } catch (e) {}
-        }, 30);
-    }
 }
 
 // Catch cases where ready is called after the browser event has already occurred.
@@ -386,6 +359,18 @@ if (features.DOM2_EVENTS) {
 // discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
 if (document.attachEvent ? readyState === "complete" : readyState !== "loading") {
     pageLoaded();
+} else {
+    if (features.DOM2_EVENTS) {
+        window.addEventListener("load", pageLoaded, false);
+        document.addEventListener("DOMContentLoaded", pageLoaded, false);
+    } else {
+        window.attachEvent("onload", pageLoaded);
+        document.attachEvent("ondataavailable", function() {
+            if (window.event.srcUrn === "DOMContentLoaded") {
+                pageLoaded();
+            }
+        });
+    }
 }
 
 /**
@@ -632,7 +617,7 @@ $Element.prototype.addClass = makeClassesMethod("add", function(className) {
 $Element.prototype.removeClass = makeClassesMethod("remove", function(className) {
     className = (" " + this._node.className + " ").replace(rclass, " ").replace(" " + className + " ", " ");
 
-    this._node.className = _.trim(className);
+    this._node.className = className.trim();
 });
 
 /**
@@ -676,9 +661,9 @@ $Element.prototype.clone = function(deep) {
 
             if (!deep) node.innerHTML = "";
         }
-
-        return new $Element(node);
     }
+
+    return new $Element(node);
 };
 
 },{"./element":15,"./features":28,"./utils":41}],12:[function(require,module,exports){
@@ -711,7 +696,7 @@ $Element.prototype.get = function(name) {
     var node = this._node,
         hook = hooks[name];
 
-    if (!node) return this.length ? _.map(this, function(el) { return el.get(name) }) : undefined;
+    if (!node) return;
 
     if (name === undefined) {
         if (node.tagName === "OPTION") {
@@ -791,40 +776,49 @@ var _ = require("./utils"),
     features = require("./features");
 
 function makeManipulationMethod(methodName, fasterMethodName, standalone, strategy) {
-    var manipulateContent = function(value) {
-            return _.legacy(this, function(node, el) {
-                var valueType = typeof value,
-                    relatedNode = node.parentNode;
+    return function() {
+        var args = arguments;
 
-                if (!(standalone || relatedNode && relatedNode.nodeType === 1)) return;
+        return this.legacy(function(node, el, index, ref) {
+            if (!(standalone || node.parentNode && node.parentNode.nodeType === 1)) return;
 
-                if (valueType === "function") {
-                    value = value.call(el);
-                    valueType = typeof value;
-                }
+            var html = "", value;
 
-                if (valueType === "string") {
-                    value = _.trim(DOM.template(value));
-                    // always use _parseFragment because of HTML5 and NoScope bugs in IE
-                    relatedNode = features.CSS3_ANIMATIONS && fasterMethodName ? null : _.parseFragment(value);
-                } else if (value instanceof $Element) {
-                    return value.legacy(function(relatedNode) { strategy(node, relatedNode); });
-                } else if (value !== undefined) {
+            _.forEach(args, function(arg) {
+                if (typeof arg === "function") arg = arg(el, index, ref);
+
+                if (typeof arg === "string") {
+                    html += DOM.template(arg).trim();
+                } else if (arg instanceof $Element) {
+                    if (html) {
+                        html = _.parseFragment(html);
+
+                        if (value) {
+                            value.appendChild(html);
+                        } else {
+                            value = html;
+                        }
+
+                        html = "";
+                    }
+
+                    if (!value) value = document.createDocumentFragment();
+                    // populate fragment
+                    arg.legacy(function(node) { value.appendChild(node) });
+                } else {
                     throw _.makeError(methodName, el);
                 }
-
-                if (!fasterMethodName || relatedNode) {
-                    strategy(node, relatedNode);
-                } else {
-                    node.insertAdjacentHTML(fasterMethodName, value);
-                }
             });
-        };
 
-    return !fasterMethodName ? manipulateContent : function() {
-        _.forEach(arguments, manipulateContent, this);
+            // always use _parseFragment because of HTML5 and NoScope bugs in legacy IE
+            if (!(fasterMethodName && features.CSS3_ANIMATIONS) && html) value = _.parseFragment(html);
 
-        return this;
+            if (!fasterMethodName || value) {
+                strategy(node, value);
+            } else if (html) {
+                node.insertAdjacentHTML(fasterMethodName, html);
+            }
+        });
     };
 }
 
@@ -899,6 +893,8 @@ hooks[":hidden"] = function(node) {
         _.getComputedStyle(node).display === "none" || !docEl.contains(node);
 };
 
+hooks[":visible"] = function(node) { return !hooks[":hidden"](node) };
+
 module.exports = hooks;
 
 },{"./utils":41}],18:[function(require,module,exports){
@@ -933,40 +929,26 @@ $Element.prototype.matches = function(selector, deep) {
 var $Element = require("./element"),
     documentElement = document.documentElement;
 /**
- * Calculates offset of current context
- * @return {{top: Number, left: Number, right: Number, bottom: Number}} offset object
+ * Calculates offset of the current element
+ * @return object with left, top, bottom, right, width and height properties
  */
 $Element.prototype.offset = function() {
-    if (!this._node) return;
+    if (this._node) {
+        var boundingRect = this._node.getBoundingClientRect(),
+            clientTop = documentElement.clientTop,
+            clientLeft = documentElement.clientLeft,
+            scrollTop = window.pageYOffset || documentElement.scrollTop,
+            scrollLeft = window.pageXOffset || documentElement.scrollLeft;
 
-    var boundingRect = this._node.getBoundingClientRect(),
-        clientTop = documentElement.clientTop,
-        clientLeft = documentElement.clientLeft,
-        scrollTop = window.pageYOffset || documentElement.scrollTop,
-        scrollLeft = window.pageXOffset || documentElement.scrollLeft;
-
-    return {
-        top: boundingRect.top + scrollTop - clientTop,
-        left: boundingRect.left + scrollLeft - clientLeft,
-        right: boundingRect.right + scrollLeft - clientLeft,
-        bottom: boundingRect.bottom + scrollTop - clientTop
-    };
-};
-
-/**
- * Calculate element's width in pixels
- * @return {Number} element width in pixels
- */
-$Element.prototype.width = function() {
-    return this.get("offsetWidth");
-};
-
-/**
- * Calculate element's height in pixels
- * @return {Number} element height in pixels
- */
-$Element.prototype.height = function() {
-    return this.get("offsetHeight");
+        return {
+            top: boundingRect.top + scrollTop - clientTop,
+            left: boundingRect.left + scrollLeft - clientLeft,
+            right: boundingRect.right + scrollLeft - clientLeft,
+            bottom: boundingRect.bottom + scrollTop - clientTop,
+            width: boundingRect.right - boundingRect.left,
+            height: boundingRect.bottom - boundingRect.top
+        };
+    }
 };
 
 },{"./element":15}],20:[function(require,module,exports){
@@ -999,7 +981,7 @@ var _ = require("./utils"),
 /**
  * Set property/attribute value by name
  * @param {String}           [name]  property/attribute name
- * @param {String|Function}  value   property/attribute value
+ * @param {String|Function}  value   property/attribute value or function that returns it
  * @return {$Element}
  * @see https://github.com/chemerisuk/better-dom/wiki/Getter-and-setter
  */
@@ -1009,7 +991,7 @@ $Element.prototype.set = function(name, value) {
         originalValue = value,
         nameType = typeof name;
 
-    return _.legacy(this, function(node, el, index) {
+    return this.legacy(function(node, el, index, ref) {
         var hook;
 
         name = originalName;
@@ -1042,7 +1024,7 @@ $Element.prototype.set = function(name, value) {
             throw _.makeError("set", el);
         }
 
-        if (typeof value === "function") value = value(el, index);
+        if (typeof value === "function") value = value(el, index, ref);
 
         if (hook = hooks[name]) {
             hook(node, value);
@@ -1065,7 +1047,7 @@ var _ = require("./utils"),
     directions = ["Top", "Right", "Bottom", "Left"],
     computed = _.getComputedStyle(document.documentElement),
     // In Opera CSSStyleDeclaration objects returned by _getComputedStyle have length 0
-    props = computed.length ? _.slice(computed) : _.map(_.keys(computed), function(key) {
+    props = computed.length ? _.slice(computed) : _.map(Object.keys(computed), function(key) {
         return key.replace(reCamel, function(str) { return "-" + str.toLowerCase() });
     });
 
@@ -1158,7 +1140,7 @@ var _ = require("./utils"),
 /**
  * CSS getter/setter for an element
  * @param  {String|Object}   name    style property name or key/value object
- * @param  {String|Function} [value] style property value
+ * @param  {String|Function} [value] style property value or function that returns it
  * @return {String|$Element} property value or reference to this
  */
 $Element.prototype.style = function(name, value) {
@@ -1178,18 +1160,16 @@ $Element.prototype.style = function(name, value) {
                 style = _.getComputedStyle(node);
                 value = hook ? hook(style) : style[name];
             }
-        } else {
-            if (this.length) value = _.map(this, function(el) { return el.style(name) });
         }
 
         return value;
     }
 
-    return _.legacy(this, function(node, el, index) {
+    return this.legacy(function(node, el, index, ref) {
         var appendCssText = function(value, key) {
             var hook = hooks.set[key];
 
-            if (typeof value === "function") value = value(el, index);
+            if (typeof value === "function") value = value(el, index, ref);
 
             if (value == null) value = "";
 
@@ -1336,62 +1316,83 @@ var _ = require("./utils"),
     $Element = require("./element"),
     DOM = require("./dom"),
     features = require("./features"),
-    toggleFn = function(el) { return el.get("aria-hidden") !== "true" },
-    makeVisibilityMethod = function(name) {
-        var createCallback = function(el) {
-                return function() { el.set("aria-hidden", name === "hide") };
-            };
+    animationEvents = features.WEBKIT_PREFIX ? ["webkitAnimationEnd", "webkitTransitionEnd"] : ["animationend", "transitionend"],
+    createCallback = function(el, callback, fn) {
+        return function() {
+            el.set("aria-hidden", fn);
 
-        return function(delay) {
-            if (delay && (typeof delay !== "number" || delay < 0)) {
+            if (callback) {
+                el.each(function(el, index, ref) {
+                    var transitionDelay = parseFloat(el.style("transition-duration")),
+                        animationDelay = parseFloat(el.style("animation-duration"));
+
+                    if (el.get("offsetWidth") && (transitionDelay || animationDelay)) {
+                        // choose max delay
+                        el.once(animationEvents[animationDelay > transitionDelay ? 0 : 1], function() {
+                            callback(el, index, ref);
+                        });
+                    } else {
+                        // use setTimeout to make a safe call
+                        setTimeout(function() { callback(el, index, ref) }, 0);
+                    }
+                });
+            }
+        };
+    },
+    makeVisibilityMethod = function(name, fn) {
+        return function(delay, callback) {
+            var delayType = typeof delay;
+
+            if (arguments.length === 1 && delayType === "function") {
+                callback = delay;
+                delay = 0;
+            }
+
+            if (delay && (delayType !== "number" || delay < 0) ||
+                callback && typeof callback !== "function") {
                 throw _.makeError(name, this);
             }
 
-            if (delay) {
-                setTimeout(createCallback(this), delay);
+            callback = createCallback(this, callback, fn);
 
-                return this;
+            if (delay) {
+                setTimeout(callback, delay);
+            } else {
+                callback();
             }
 
-            return this.set("aria-hidden", name === "hide");
+            return this;
         };
     };
 
 /**
- * Show element
- * @param {Number} [delay=0] time in miliseconds to wait
+ * Show element with optional callback and delay
+ * @param {Number}   [delay=0]  time in miliseconds to wait
+ * @param {Function} [callback] function that executes when animation is done
  * @return {$Element}
  * @function
  */
-$Element.prototype.show = makeVisibilityMethod("show");
+$Element.prototype.show = makeVisibilityMethod("show", false);
 
 /**
- * Hide element
- * @param {Number} [delay=0] time in miliseconds to wait
+ * Hide element with optional callback and delay
+ * @param {Number}   [delay=0]  time in miliseconds to wait
+ * @param {Function} [callback] function that executes when animation is done
  * @return {$Element}
  * @function
  */
-$Element.prototype.hide = makeVisibilityMethod("hide");
+$Element.prototype.hide = makeVisibilityMethod("hide", true);
 
 /**
- * Toggle element visibility
- * @param {Boolean|Function} [visible] true if the element should be visible and false otherwise
+ * Toggle element visibility with optional callback and delay
+ * @param {Number}   [delay=0]  time in miliseconds to wait
+ * @param {Function} [callback] function that executes when animation is done
  * @return {$Element}
+ * @function
  */
-$Element.prototype.toggle = function(visible) {
-    var visibleType = typeof visible,
-        value = toggleFn;
-
-    if (visibleType === "boolean") {
-        value = !visible;
-    } else if (visibleType === "function") {
-        value = function(el, index) { return !visible(el, index) };
-    } else if (visible) {
-        throw _.makeError("toggle", this);
-    }
-
-    return this.set("aria-hidden", value);
-};
+$Element.prototype.toggle = makeVisibilityMethod("toggle", function(el) {
+    return el.get("aria-hidden") !== "true";
+});
 
 // [aria-hidden=true] could be overriden only if browser supports animations
 // pointer-events:none helps to solve accidental clicks on a hidden element
@@ -1463,46 +1464,48 @@ var _ = require("./utils"),
     },
     testEl = document.createElement("div");
 
-function EventHandler(type, selector, context, callback, props, currentTarget) {
-    context = context || currentTarget;
-
+module.exports = function(type, selector, callback, props, el, once) {
     var matcher = SelectorMatcher(selector),
         handler = function(e) {
-            if (EventHandler.skip === type) return; // early stop in case of default action
+            if (module.exports.skip === type) return; // early stop in case of default action
 
             e = e || window.event;
 
-            var target = e.target || e.srcElement,
-                root = currentTarget._node,
-                fn = typeof callback === "string" ? context[callback] : callback,
-                args = props || ["target", "defaultPrevented"];
+            // srcElement could be null in legacy IE when target is document
+            var node = el._node,
+                target = e.target || e.srcElement || document,
+                currentTarget = selector ? target : node,
+                fn = typeof callback === "string" ? el[callback] : callback,
+                args = props || [selector ? "currentTarget" : "target", "defaultPrevented"];
 
-            if (typeof fn !== "function") return; // early stop in case of late binding
+            if (typeof fn !== "function") return; // early stop for late binding
 
-            for (; matcher && !matcher(target); target = target.parentNode) {
-                if (!target || target === root) return; // no matched element was found
+            for (; matcher && !matcher(currentTarget); currentTarget = currentTarget.parentNode) {
+                if (!currentTarget || currentTarget === node) return; // no matched element was found
             }
+
+            // off callback even if it throws an exception later
+            if (once) el.off(type, callback);
 
             args = _.map(args, function(name) {
                 switch (name) {
                 case "type":
                     return type;
-                case "currentTarget":
-                    return currentTarget;
                 case "target":
-                    // handle DOM variable correctly
-                    return target ? $Element(target) : DOM;
+                    return $Element(target);
+                case "currentTarget":
+                    return $Element(currentTarget);
                 }
 
                 var hook = hooks[name];
 
-                return hook ? hook(e, root) : e[name];
+                return hook ? hook(e, node) : e[name];
             });
 
             // prepend extra arguments if they exist
             if (e._args && e._args.length) args = e._args.concat(args);
 
-            if (fn.apply(context, args) === false) {
+            if (fn.apply(el, args) === false) {
                 // prevent default if handler returns false
                 if (features.DOM2_EVENTS) {
                     e.preventDefault();
@@ -1520,9 +1523,7 @@ function EventHandler(type, selector, context, callback, props, currentTarget) {
     }
 
     return handler;
-}
-
-module.exports = EventHandler;
+};
 
 },{"./element":15,"./eventhandler.hooks":26,"./features":28,"./selectormatcher":40,"./utils":41}],28:[function(require,module,exports){
 var doc = document,
@@ -1530,7 +1531,8 @@ var doc = document,
 
 module.exports = {
     CSS3_ANIMATIONS: win.CSSKeyframesRule || !doc.attachEvent,
-    DOM2_EVENTS: !!doc.addEventListener
+    DOM2_EVENTS: !!doc.addEventListener,
+    WEBKIT_PREFIX: window.WebKitAnimationEvent ? "-webkit-" : ""
 };
 
 },{}],29:[function(require,module,exports){
@@ -1577,13 +1579,14 @@ $Node.prototype.data = function(key, value) {
                 if (value === undefined) {
                     try {
                         value = node.getAttribute("data-" + key);
-                        value = JSON.parse("{\"" + value.split(";").join("\",\"").split("=").join("\":\"") + "\"}");
+                        // parse object notation syntax
+                        if (value[0] === "{" && value[value.length - 1] === "}") {
+                            value = JSON.parse(value);
+                        }
                     } catch (err) {}
 
                     data[key] = value;
                 }
-            } else {
-                if (this.length) value = _.map(this, function(el) { return el.data(key) });
             }
 
             return value;
@@ -1605,7 +1608,6 @@ var _ = require("./utils"),
 // big part of code inspired by Sizzle:
 // https://github.com/jquery/sizzle/blob/master/sizzle.js
 
-// TODO: disallow to use buggy selectors?
 var rquickExpr = document.getElementsByClassName ? /^(?:(\w+)|\.([\w\-]+))$/ : /^(?:(\w+))$/,
     rsibling = /[\x20\t\r\n\f]*[+~>]/,
     rescape = /'|\\/g,
@@ -1621,17 +1623,17 @@ $Node.prototype.find = function(selector, /*INTERNAL*/multiple) {
 
     var node = this._node,
         quickMatch = rquickExpr.exec(selector),
-        m, elements, old, nid, context;
+        elements, old, nid, context;
 
     if (!node) return new $Element();
 
     if (quickMatch) {
-        // Speed-up: "TAG"
         if (quickMatch[1]) {
+            // speed-up: "TAG"
             elements = node.getElementsByTagName(selector);
-        // Speed-up: ".CLASS"
-        } else if (m = quickMatch[2]) {
-            elements = node.getElementsByClassName(m);
+        } else {
+            // speed-up: ".CLASS"
+            elements = node.getElementsByClassName(quickMatch[2]);
         }
 
         if (elements && !multiple) elements = elements[0];
@@ -1709,7 +1711,7 @@ $Node.prototype.fire = function(type) {
 
             canContinue = node.dispatchEvent(e);
         } else {
-            isCustomEvent = handler.custom || !("on" + type in node);
+            isCustomEvent = type === "submit" || !("on" + type in node);
             e = document.createEventObject();
             // store original event type
             e.srcUrn = isCustomEvent ? type : undefined;
@@ -1830,8 +1832,7 @@ _.extend($Node.prototype, {
 });
 
 },{"./node":35,"./utils":41}],34:[function(require,module,exports){
-var _ = require("./utils"),
-    $Node = require("./node");
+var $Node = require("./node");
 
 /**
  * Get property value by name
@@ -1839,12 +1840,10 @@ var _ = require("./utils"),
  * @return {String} property value
  */
 $Node.prototype.get = function(name) {
-    if (typeof name !== "string") throw _.makeError(this, "get");
-
     return this._node[name];
 };
 
-},{"./node":35,"./utils":41}],35:[function(require,module,exports){
+},{"./node":35}],35:[function(require,module,exports){
 /**
  * Used to represent a DOM node
  * @name $Node
@@ -1873,22 +1872,16 @@ var _ = require("./utils"),
 /**
  * Unbind an event from the element
  * @param  {String}          type type of event
- * @param  {Object}          [context] callback context
  * @param  {Function|String} [callback] event handler
  * @return {$Node}
  * @see https://github.com/chemerisuk/better-dom/wiki/Event-handling
  */
-$Node.prototype.off = function(type, context, callback) {
+$Node.prototype.off = function(type, callback) {
     if (typeof type !== "string") throw _.makeError("off", this);
 
-    if (arguments.length === 2) {
-        callback = context;
-        context = !callback ? undefined : this;
-    }
-
-    return _.legacy(this, function(node, el) {
+    return this.legacy(function(node, el) {
         _.forEach(el._listeners, function(handler, index, events) {
-            if (handler && type === handler.type && (!context || context === handler.context) && (!callback || callback === handler.callback)) {
+            if (handler && type === handler.type && (!callback || callback === handler.callback)) {
                 type = handler._type || handler.type;
 
                 if (features.DOM2_EVENTS) {
@@ -1908,8 +1901,6 @@ $Node.prototype.off = function(type, context, callback) {
 
 },{"./features":28,"./node":35,"./utils":41}],37:[function(require,module,exports){
 var _ = require("./utils"),
-    $Element = require("./element"),
-    features = require("./features"),
     hooks = {};
 
 // firefox doesn't support focusin/focusout events
@@ -1925,82 +1916,9 @@ if (document.createElement("input").validity) {
     hooks.invalid = function(handler) { handler.capturing = true };
 }
 
-if (!features.CSS3_ANIMATIONS) {
-    // input event fix via propertychange
-    document.attachEvent("onfocusin", (function() {
-        var legacyEventHandler = function() {
-                if (capturedNode && capturedNode.value !== capturedNodeValue) {
-                    capturedNodeValue = capturedNode.value;
-                    // trigger special event that bubbles
-                    $Element(capturedNode).fire("input");
-                }
-            },
-            capturedNode, capturedNodeValue;
-
-        if (features.DOM2_EVENTS) {
-            // IE9 doesn't fire oninput when text is deleted, so use
-            // legacy onselectionchange event to detect such cases
-            // http://benalpert.com/2013/06/18/a-near-perfect-oninput-shim-for-ie-8-and-9.html
-            document.attachEvent("onselectionchange", legacyEventHandler);
-        }
-
-        return function() {
-            var target = window.event.srcElement,
-                type = target.type;
-
-            if (capturedNode) {
-                capturedNode.detachEvent("onpropertychange", legacyEventHandler);
-                capturedNode = undefined;
-            }
-
-            if (type === "text" || type === "password" || type === "textarea") {
-                (capturedNode = target).attachEvent("onpropertychange", legacyEventHandler);
-            }
-        };
-    })());
-
-    if (!features.DOM2_EVENTS) {
-        // submit event bubbling fix
-        document.attachEvent("onkeydown", function() {
-            var e = window.event,
-                target = e.srcElement,
-                form = target.form;
-
-            if (form && target.type !== "textarea" && e.keyCode === 13 && e.returnValue !== false) {
-                $Element(form).fire("submit");
-
-                return false;
-            }
-        });
-
-        document.attachEvent("onclick", (function() {
-            var handleSubmit = function() {
-                    var form = window.event.srcElement;
-
-                    form.detachEvent("onsubmit", handleSubmit);
-
-                    $Element(form).fire("submit");
-
-                    return false;
-                };
-
-            return function() {
-                var target = window.event.srcElement,
-                    form = target.form;
-
-                if (form && target.type === "submit") {
-                    form.attachEvent("onsubmit", handleSubmit);
-                }
-            };
-        })());
-
-        hooks.submit = function(handler) { handler.custom = true };
-    }
-}
-
 module.exports = hooks;
 
-},{"./element":15,"./features":28,"./utils":41}],38:[function(require,module,exports){
+},{"./utils":41}],38:[function(require,module,exports){
 var _ = require("./utils"),
     $Node = require("./node"),
     EventHandler = require("./eventhandler"),
@@ -2008,15 +1926,14 @@ var _ = require("./utils"),
     features = require("./features");
 
 /**
- * Bind a DOM event to the context
+ * Bind a DOM event
  * @param  {String|Array}    type event type(s) with optional selector
- * @param  {Object}          [context] callback context
- * @param  {Function|String} callback event callback/property name
+ * @param  {Function|String} callback event callback or property name (for late binding)
  * @param  {Array}           [props] array of event properties to pass into the callback
  * @return {$Node}
  * @see https://github.com/chemerisuk/better-dom/wiki/Event-handling
  */
-$Node.prototype.on = function(type, context, callback, props, /*INTERNAL*/once) {
+$Node.prototype.on = function(type, callback, props, /*INTERNAL*/once) {
     var eventType = typeof type,
         selector, index, args;
 
@@ -2028,20 +1945,12 @@ $Node.prototype.on = function(type, context, callback, props, /*INTERNAL*/once) 
             type = type.substr(0, index);
         }
 
-        // handle optional context argument
-        if (typeof context !== "object") {
-            once = props;
-            props = callback;
-            callback = context;
-            context = undefined;
-        }
-
-        if (typeof props !== "object") {
+        if (!Array.isArray(props)) {
             once = props;
             props = undefined;
         }
     } else if (eventType === "object") {
-        if (_.isArray(type)) {
+        if (Array.isArray(type)) {
             args = _.slice(arguments, 1);
 
             _.forEach(type, function(name) { this.on.apply(this, [name].concat(args)) }, this);
@@ -2054,26 +1963,14 @@ $Node.prototype.on = function(type, context, callback, props, /*INTERNAL*/once) 
         throw _.makeError("on", this);
     }
 
-    return _.legacy(this, function(node, el) {
-        var hook, handler;
+    return this.legacy(function(node, el) {
+        var handler = EventHandler(type, selector, callback, props, el, once),
+            hook = hooks[type];
 
-        if (once) {
-            callback = (function(originalCallback) {
-                return function() {
-                    // remove event listener
-                    el.off(handler.type, handler.context, callback);
-
-                    return originalCallback.apply(el, arguments);
-                };
-            }(callback));
-        }
-
-        handler = EventHandler(type, selector, context, callback, props, el);
         handler.type = selector ? type + " " + selector : type;
         handler.callback = callback;
-        handler.context = context || el;
 
-        if (hook = hooks[type]) hook(handler);
+        if (hook) hook(handler);
 
         if (features.DOM2_EVENTS) {
             node.addEventListener(handler._type || type, handler, !!handler.capturing);
@@ -2090,10 +1987,9 @@ $Node.prototype.on = function(type, context, callback, props, /*INTERNAL*/once) 
 
 /**
  * Bind a DOM event but fire once before being removed
- * @param  {String}   type type of event with optional selector to filter by
- * @param  {Array}    [props] event properties to pass to the callback function
- * @param  {Object}   [context] callback context
- * @param  {Function|String} callback event callback/property name
+ * @param  {String|Array}    type event type(s) with optional selector
+ * @param  {Function|String} callback event callback or property name (for late binding)
+ * @param  {Array}           [props] array of event properties to pass into the callback
  * @return {$Node}
  * @see https://github.com/chemerisuk/better-dom/wiki/Event-handling
  */
@@ -2106,8 +2002,7 @@ $Node.prototype.once = function() {
 };
 
 },{"./eventhandler":27,"./features":28,"./node":35,"./node.on.hooks":37,"./utils":41}],39:[function(require,module,exports){
-var _ = require("./utils"),
-    $Node = require("./node");
+var $Node = require("./node");
 
 /**
  * Set property value by name
@@ -2115,14 +2010,12 @@ var _ = require("./utils"),
  * @param  {String} value property value
  */
 $Node.prototype.set = function(name, value) {
-    if (typeof name !== "string" || typeof value !== "string") throw _.makeError(this, "set");
-
     this._node[name] = value;
 
     return this;
 };
 
-},{"./node":35,"./utils":41}],40:[function(require,module,exports){
+},{"./node":35}],40:[function(require,module,exports){
 /*
  * Helper for css selectors
  */
@@ -2149,18 +2042,20 @@ module.exports = function(selector) {
         if (quick[4]) quick[4] = " " + quick[4] + " ";
     }
 
-    return function(el) {
-        if (!quick) {
-            if (matchesProp) return el[matchesProp](selector);
+    return function(node) {
+        if (!node || node.nodeType !== 1) return false;
 
-            return _.some(document.querySelectorAll(selector), function(x) { return x === el });
+        if (!quick) {
+            if (matchesProp) return node[matchesProp](selector);
+
+            return _.some(document.querySelectorAll(selector), function(x) { return x === node });
         }
 
         return (
-            (!quick[1] || el.nodeName.toLowerCase() === quick[1]) &&
-            (!quick[2] || el.id === quick[2]) &&
-            (!quick[3] || (quick[3][1] ? el.getAttribute(quick[3][0]) === quick[3][1] : el.hasAttribute(quick[3][0]))) &&
-            (!quick[4] || (" " + el.className + " ").indexOf(quick[4]) >= 0)
+            (!quick[1] || node.nodeName.toLowerCase() === quick[1]) &&
+            (!quick[2] || node.id === quick[2]) &&
+            (!quick[3] || (quick[3][1] ? node.getAttribute(quick[3][0]) === quick[3][1] : node.hasAttribute(quick[3][0]))) &&
+            (!quick[4] || (" " + node.className + " ").indexOf(quick[4]) >= 0)
         );
     };
 };
@@ -2193,13 +2088,6 @@ var DOM = require("./dom"),
     })();
 
 module.exports = {
-    trim: (function() {
-        var reTrim = /^\s+|\s+$/g;
-
-        return function(str) {
-            return String.prototype.trim ? str.trim() : str.replace(reTrim, "");
-        };
-    }()),
     makeError: function(method, el) {
         var type = el === DOM ? "DOM" : "$Element";
 
@@ -2208,32 +2096,11 @@ module.exports = {
 
     // OBJECT UTILS
 
-    forOwn: (function() {
-        if (Object.keys) {
-            return makeLoopMethod({
-                BEFORE: "var keys = Object.keys(a), k",
-                COUNT:  "keys.length",
-                BODY:   "k = keys[i]; cb.call(that, a[k], k, a)"
-            });
-        } else {
-            return function(obj, callback, thisPtr) {
-                for (var prop in obj) {
-                    if (Object.prototype.hasOwnProperty.call(obj, prop)) callback.call(thisPtr, obj[prop], prop, obj);
-                }
-            };
-        }
-    }()),
-    keys: Object.keys || (function() {
-        var collectKeys = function(value, key) { this.push(key); };
-
-        return function(obj) {
-            var result = [];
-
-            this.forOwn(obj, collectKeys, result);
-
-            return result;
-        };
-    }()),
+    forOwn: makeLoopMethod({
+        BEFORE: "var keys = Object.keys(a), k",
+        COUNT:  "keys.length",
+        BODY:   "k = keys[i]; cb.call(that, a[k], k, a)"
+    }),
     extend: function(obj, mixins) {
         this.forOwn(mixins || {}, function(value, key) { obj[key] = value });
 
@@ -2283,9 +2150,6 @@ module.exports = {
     slice: function(list, index) {
         return Array.prototype.slice.call(list, index | 0);
     },
-    isArray: Array.isArray || function(obj) {
-        return Object.prototype.toString.call(obj) === "[object Array]";
-    },
 
     // DOM UTILS
 
@@ -2307,24 +2171,11 @@ module.exports = {
             return fragment;
         };
     })(),
-    requestAnimationFrame: (function() {
-        var lastTime = 0;
-
-        return window.requestAnimationFrame || window.mozRequestAnimationFrame ||
-            window.webkitRequestAnimationFrame || function(callback) {
-            var currTime = new Date().getTime(),
-                timeToCall = Math.max(0, 16 - (currTime - lastTime));
-
-            lastTime = currTime + timeToCall;
-
-            if (timeToCall) {
-                setTimeout(callback, timeToCall);
-            } else {
-                callback(currTime + timeToCall);
-            }
-        };
-    }())
+    requestAnimationFrame: window.requestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame
 };
 
-},{"./dom":6}]},{},[2,1,3,4,5,6,7,8,9,11,10,12,13,14,16,17,15,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41])
+},{"./dom":6}]},{},[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41])
 ;

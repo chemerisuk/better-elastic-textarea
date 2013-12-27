@@ -1,4 +1,4 @@
-(function(DOM, SPACE_HOLDER_KEY) {
+(function(DOM) {
     "use strict";
 
     // Insiped by article at a list apart:
@@ -8,11 +8,9 @@
         constructor: function() {
             var wrapper = DOM.create("div.better-elastic-textarea>pre>span");
 
-            this
-                .data(SPACE_HOLDER_KEY, wrapper.find("span"))
-                .on("input", this.onInput);
+            this.on("input", this.onInput.bind(this, wrapper.find("span")));
 
-            this.parent("form").on("reset", this, this.onFormReset);
+            this.parent("form").on("reset", this.onFormReset.bind(this));
 
             wrapper.child(0).style({
                 font: this.style("font"),
@@ -23,18 +21,18 @@
 
             wrapper.append(this.after(wrapper));
         },
-        onInput: function(value) {
+        onInput: function(holder, value) {
             // use textarea value in regular input event case
-            if (arguments.length < 3) value = this.get();
+            if (arguments.length < 4) value = this.get();
 
             // use &nbsp; to fix issue with adding a new line
             if (value[value.length - 1] === "\n") value += "&nbsp;";
 
             // IE doesn't respect newlines so use <br> instead
-            this.data(SPACE_HOLDER_KEY).set(value.split("\n").join("<br>"));
+            holder.set(value.split("\n").join("<br>"));
         },
         onFormReset: function() {
             this.fire("input", this.get("defaultValue"));
         }
     });
-}(window.DOM, "space-holder"));
+}(window.DOM));

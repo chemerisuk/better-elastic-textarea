@@ -1,24 +1,30 @@
 # better-dom [![Build Status](https://api.travis-ci.org/chemerisuk/better-dom.png?branch=master)](http://travis-ci.org/chemerisuk/better-dom)
 > Live extension playground
 
+jQuery knows a concept called “**live events**”. Using the idea of event delegation they enabled developers to handle existing and future elements. But there are a lot of cases when more flexibility is required. For example, delegated events fall short when the DOM needs to be mutated in order to initialize a widget. Therefore I'd like to introduce **live extensions**.
+
+There is a section in the [Web Components](http://www.w3.org/TR/components-intro/) spec called “[Decorators](http://www.w3.org/TR/components-intro/#decorator-section)” which is trying to solve a similar problem. Currently it uses a markup-based implementation with a special syntax for attaching event listeners on child elements. But the concept is still an early draft:
+
+> Decorators, unlike other parts of Web Components, do not have a specification yet.
+
 [API DOCUMENTATION](http://chemerisuk.github.io/better-dom/)
 
 ## Features
-* compact size (~28kb minified and ~6kb gzipped)
-* clean, standards-based (if possible) APIs
+* compact size (~27kb minified and ~6kb gzipped)
+* clean, minimalistic and standards-based (if possible) APIs
 * [live extensions](https://github.com/chemerisuk/better-dom/wiki/Live-extensions)
-* [smarter getter and setter](https://github.com/chemerisuk/better-dom/wiki/Getter-and-setter)
-* [event handling best practices](https://github.com/chemerisuk/better-dom/wiki/Event-handling)
+* [getter and setter](https://github.com/chemerisuk/better-dom/wiki/Getter-and-setter)
+* [better event handling](https://github.com/chemerisuk/better-dom/wiki/Event-handling)
 * [microtemplating via emmet-like syntax](https://github.com/chemerisuk/better-dom/wiki/Microtemplating)
-* [localization support](https://github.com/chemerisuk/better-dom/wiki/Localization)
-* [css3 animations support](http://jsfiddle.net/C3WeM/)
-* cross-browser `input` event
+* [i18n support](https://github.com/chemerisuk/better-dom/wiki/Localization)
+* [css3 animations support](http://jsfiddle.net/C3WeM/4/)
 
 ## Performance
-* [DOM.create vs jquery](http://jsperf.com/dom-create-vs-jquery/17)
-* [emmet vs DOM.template](http://jsperf.com/emmet-vs-dom-parsetemplate/10)
-* [DOM.find[All] vs jQuery.find](http://jsperf.com/dom-find-all-vs-jquery-find/2)
-* [DOM getter/setter vs jQuery.attr/prop](http://jsperf.com/dom-getter-setter-vs-jquery-attr-prop/2)
+* [DOM.create vs jquery](http://jsperf.com/dom-create-vs-jquery/18)
+* [DOM.find[All] vs jQuery.find](http://jsperf.com/dom-find-all-vs-jquery-find/3)
+* [DOM getter/setter vs jQuery.attr/prop](http://jsperf.com/dom-getter-setter-vs-jquery-attr-prop/3)
+* [better-dom vs jquery: classes manipulation](http://jsperf.com/better-dom-vs-jquery-classes-manipulation)
+* [better-dom vs jquery: array methods](http://jsperf.com/better-dom-vs-jquery-array-methods/2)
 
 ## Installation
 The simplest way is to use [bower](http://bower.io/):
@@ -33,8 +39,8 @@ This will clone the latest version of the __better-dom__ with dependencies into 
 <head>
     ...
     <!--[if IE]>
-        <link href="bower_components/better-dom/dist/better-dom.htc" rel="htc"/>
-        <script src="bower_components/html5shiv/dist/html5shiv.js"></script>
+        <link href="bower_components/better-dom/dist/better-dom-legacy.htc" rel="htc"/>
+        <script src="bower_components/better-dom/dist/better-dom-legacy.js"></script>
     <![endif]-->
 </head>
 <body>
@@ -44,7 +50,7 @@ This will clone the latest version of the __better-dom__ with dependencies into 
 </html>
 ```
 
-## Usage examples
+## Projects that use better-dom
 * [better-ajaxify](https://github.com/chemerisuk/better-ajaxify) - Ajax websites engine
 * [better-dateinput-polyfill](https://github.com/chemerisuk/better-dateinput-polyfill) - `input[type=date]` polyfill
 * [better-timeinput-polyfill](https://github.com/chemerisuk/better-timeinput-polyfill) - `input[type=time]` polyfill
@@ -54,7 +60,9 @@ This will clone the latest version of the __better-dom__ with dependencies into 
 * [better-elastic-textarea](https://github.com/chemerisuk/better-elastic-textarea) - Make textarea to expand on user input
 
 ## Notes about old IEs
-For IE8-9 support you have to incude conditional comment above into head. The excellent __html5shiv__ library is used to fix the HTML5 elements bug in legacy browsers and the HTC file helps to implement live extensions support.
+For IE8-9 support you have to incude the conditional comment above with 2 extra elements into `<head>`. The excellent [html5shiv](https://github.com/aFarkas/html5shiv) provides fix for new HTML5 tags and [es5-shim](https://github.com/kriskowal/es5-shim) is used to polyfill missed standards-based functions. These projects are bundled into **better-dom-legacy.js** with other fixes.
+
+The **better-dom-legacy.htc** file helps to implement [live extensions](https://github.com/chemerisuk/better-dom/wiki/Live-extensions) support. This fact applies several important limitations that you must know in case when legacy browser support is required.
 
 #### Setup content-type header
 HTC behaviors have to serve up with a content-type header of “text/x-component”, otherwise IE will simply ignore the file. Many web servers are preconfigured with the correct content-type, but others are not.
@@ -66,7 +74,7 @@ IE requires that the HTC file must be in the same domain with as the HTML page w
 
 ## Browser support
 * Chrome
-* Safari 5.2.2+
+* Safari 6.0+
 * Firefox 16+
 * Opera 12.10+
 * IE8+
