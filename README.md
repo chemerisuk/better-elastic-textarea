@@ -35,7 +35,7 @@ Then append the following script on your page:
 
 ## Browser support
 * Chrome
-* Safari 5.2.2+
+* Safari 6.0+
 * Firefox 16+
 * Opera 12.10+
 * IE8+

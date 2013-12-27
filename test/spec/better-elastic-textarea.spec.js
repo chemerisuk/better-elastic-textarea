@@ -5,23 +5,29 @@ describe("better-elastic-textarea", function() {
 
     beforeEach(function() {
         textarea = DOM.mock("textarea[rows='1']");
-        holder = textarea.data("space-holder");
+        holder = DOM.mock();
     });
 
     it("should update holder value on input", function() {
-        var spy = spyOn(textarea, "get").andReturn("321");
+        var spy = spyOn(textarea, "get").andReturn("321"),
+            holderSpy = spyOn(holder, "set");
 
-        textarea.onInput();
+        textarea.onInput(holder);
         expect(spy).toHaveBeenCalled();
-        expect(holder.get()).toBe("321");
+        expect(holderSpy).toHaveBeenCalledWith("321");
     });
 
     it("should restore defaultValue on form reset", function() {
-        var spy = spyOn(textarea, "get").andReturn("123");
+        var spy = spyOn(textarea, "get").andReturn("123"),
+            inputSpy = jasmine.createSpy("oninput");
 
-        textarea.onFormReset();
+        inputSpy.andCallFake(function(value) {
+            expect(value).toBe("123");
+        });
+
+        textarea.on("input", inputSpy).onFormReset();
         expect(spy).toHaveBeenCalledWith("defaultValue");
-        expect(holder.get()).toBe("123");
+        expect(inputSpy).toHaveBeenCalled();
     });
 
 });
