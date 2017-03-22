@@ -4,7 +4,7 @@
 [VIEW DEMO](http://chemerisuk.github.io/better-elastic-textarea/)
 
 ## Features
-* all `textarea[rows='1']` elements expand on any king of content insertion: manually or from clipboard
+* all `textarea[rows='1']` elements expand on any kind of content insertion: manually or from clipboard
 * [live extension](https://github.com/chemerisuk/better-dom/wiki/Live-extensions) - works for current and future content
 
 ## Installing
