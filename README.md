@@ -8,29 +8,19 @@
 * [live extension](https://github.com/chemerisuk/better-dom/wiki/Live-extensions) - works for current and future content
 
 ## Installing
-Use [bower](http://bower.io/) to download this extension with all required dependencies.
+The simplest way is to use [bower](http://bower.io/):
 
-    bower install better-elastic-textarea --save
+```sh
+$ bower install better-elastic-textarea
+```
 
-This will clone the latest version of the __better-elastic-textarea__ into the `bower_components` directory at the root of your project.
+This will clone the latest version of the __better-dateinput-polyfill__ with dependencies into the `bower_components` directory at the root of your project.
 
 Then append the following script on your page:
 
 ```html
-<html>
-<head>
-    ...
-    <!--[if IE]>
-        <link href="bower_components/better-dom/dist/better-dom-legacy.htc" rel="htc"/>
-        <script src="bower_components/better-dom/dist/better-dom-legacy.js"></script>
-    <![endif]-->
-</head>
-<body>
-    ...
-    <script src="bower_components/better-dom/dist/better-dom.js"></script>
-    <script src="bower_components/better-elastic-textarea/dist/better-elastic-textarea.js"></script>
-</body>
-</html>
+<script src="bower_components/better-dom/dist/better-dom.js"></script>
+<script src="bower_components/better-elastic-textarea/dist/better-elastic-textarea.js"></script>
 ```
 
 ## Browser support
@@ -39,7 +29,7 @@ Then append the following script on your page:
 * Firefox 16+
 * Opera 12.10+
 * IE8+
-* 
+
 [npm-url]: https://www.npmjs.com/package/better-elastic-textarea
 [npm-version]: https://img.shields.io/npm/v/better-elastic-textarea.svg
 [npm-downloads]: https://img.shields.io/npm/dt/better-elastic-textarea.svg
