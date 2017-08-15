@@ -5,12 +5,12 @@
     // http://alistapart.com/article/expanding-text-areas-made-elegant
 
     DOM.extend("textarea[rows='1']", {
-        constructor: function() {
-            var wrapper = DOM.create("<div class='better-elastic-textarea'><pre><span></span></pre></div>");
+        constructor() {
+            const wrapper = DOM.create("<div class='better-elastic-textarea'><pre><span></span></pre></div>");
+            const holder = wrapper.find("span");
 
-            this.on("input", this._inputTextarea.bind(this, wrapper.find("span")));
-
-            this.closest("form").on("reset", this._resetForm.bind(this));
+            this.on("input", this._inputTextarea.bind(this, holder));
+            this.closest("form").on("reset", this._inputTextarea.bind(this, holder, "defaultValue"));
 
             wrapper.child(0).css({
                 font: this.css("font"),
@@ -21,16 +21,13 @@
 
             wrapper.append(this.after(wrapper));
         },
-        _inputTextarea(holder, value) {
+        _inputTextarea(holder, propName) {
             // use textarea value in regular input event case
-            if (arguments.length < 4) value = this.value();
+            var value = propName ? this.get(propName) : this.value();
             // use &nbsp; to fix issue with adding a new line
             if (value[value.length - 1] === "\n") value += "&nbsp;";
             // IE doesn't respect newlines so use <br> instead
             holder.set("innerHTML", value.split("\n").join("<br>"));
-        },
-        _resetForm() {
-            this.fire("input", this.get("defaultValue"));
         }
     });
 }(window.DOM));
