@@ -1,12 +1,7 @@
 language: node_js
 node_js:
-  - 0.10
-before_script:
-  - npm install -g grunt-cli
+  - 4.2
+before_install:
+  - npm install -g gulp
   - npm install -g bower
   - bower install
-git:
-  depth: 1
-branches:
-  only:
-    - master
