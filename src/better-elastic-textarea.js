@@ -6,32 +6,30 @@
 
     DOM.extend("textarea[rows='1']", {
         constructor: function() {
-            var wrapper = DOM.create("div.better-elastic-textarea>pre>span");
+            var wrapper = DOM.create("<div class='better-elastic-textarea'><pre><span></span></pre></div>");
 
-            this.on("input", this.onInput.bind(this, wrapper.find("span")));
+            this.on("input", this._inputTextarea.bind(this, wrapper.find("span")));
 
-            this.parent("form").on("reset", this.onFormReset.bind(this));
+            this.closest("form").on("reset", this._resetForm.bind(this));
 
-            wrapper.child(0).style({
-                font: this.style("font"),
-                margin: this.style("margin"),
-                padding: this.style("padding"),
-                "border-width": this.style("border-width")
+            wrapper.child(0).css({
+                font: this.css("font"),
+                margin: this.css("margin"),
+                padding: this.css("padding"),
+                "border-width": this.css("border-width")
             });
 
             wrapper.append(this.after(wrapper));
         },
-        onInput: function(holder, value) {
+        _inputTextarea(holder, value) {
             // use textarea value in regular input event case
-            if (arguments.length < 4) value = this.get();
-
+            if (arguments.length < 4) value = this.value();
             // use &nbsp; to fix issue with adding a new line
             if (value[value.length - 1] === "\n") value += "&nbsp;";
-
             // IE doesn't respect newlines so use <br> instead
-            holder.set(value.split("\n").join("<br>"));
+            holder.set("innerHTML", value.split("\n").join("<br>"));
         },
-        onFormReset: function() {
+        _resetForm() {
             this.fire("input", this.get("defaultValue"));
         }
     });

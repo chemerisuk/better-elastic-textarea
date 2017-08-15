@@ -1,33 +1,32 @@
-textarea[rows="1"] {
-    display: block;
-    width: 100%;
-    resize: none;
+@media screen {
+    textarea[rows='1'] {
+        display: block;
+        width: 100%;
+        resize: none;
+        box-sizing: border-box;
+    }
 
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-}
+    .better-elastic-textarea {
+        position: relative;
+    }
 
-.better-elastic-textarea {
-    position: relative;
-}
+    .better-elastic-textarea > textarea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        overflow: hidden;
+        margin: 0;
+    }
 
-.better-elastic-textarea > textarea {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    overflow: hidden;
-    margin: 0;
-}
+    .better-elastic-textarea > pre {
+        visibility: hidden;
+        margin: 0;
+        border-style: solid;
+    }
 
-.better-elastic-textarea > pre {
-    visibility: hidden;
-    margin: 0;
-    border-style: solid;
-}
-
-.better-elastic-textarea span {
-    display: inline-block;
-    white-space: pre-wrap;
+    .better-elastic-textarea span {
+        display: inline-block;
+        white-space: pre-wrap;
+    }
 }

@@ -1,4 +1,4 @@
-# better-elastic-textarea [![Build Status](https://api.travis-ci.org/chemerisuk/better-elastic-textarea.png?branch=master)](http://travis-ci.org/chemerisuk/better-elastic-textarea)
+# better-elastic-textarea<br>[![NPM version][npm-version]][npm-url] [![NPM downloads][npm-downloads]][npm-url] [![Build Status][travis-image]][travis-url] [![Coverage Status][coveralls-image]][coveralls-url] [![Bower version][bower-image]][bower-url]
 > Elastic textarea for [better-dom](https://github.com/chemerisuk/better-dom)
 
 [VIEW DEMO](http://chemerisuk.github.io/better-elastic-textarea/)
@@ -39,3 +39,16 @@ Then append the following script on your page:
 * Firefox 16+
 * Opera 12.10+
 * IE8+
+* 
+[npm-url]: https://www.npmjs.com/package/better-elastic-textarea
+[npm-version]: https://img.shields.io/npm/v/better-elastic-textarea.svg
+[npm-downloads]: https://img.shields.io/npm/dt/better-elastic-textarea.svg
+
+[travis-url]: http://travis-ci.org/chemerisuk/better-elastic-textarea
+[travis-image]: http://img.shields.io/travis/chemerisuk/better-elastic-textarea/master.svg
+
+[coveralls-url]: https://coveralls.io/r/chemerisuk/better-elastic-textarea
+[coveralls-image]: http://img.shields.io/coveralls/chemerisuk/better-elastic-textarea/master.svg
+
+[bower-url]: https://github.com/chemerisuk/better-elastic-textarea
+[bower-image]: http://img.shields.io/bower/v/better-elastic-textarea.svg

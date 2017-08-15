@@ -8,16 +8,24 @@
     "type": "git",
     "url": "https://github.com/chemerisuk/better-elastic-textarea"
   },
-  "scripts": {
-    "test": "grunt test"
+  "keywords": [
+    "ecosystem:better-dom",
+    "web-components"
+  ],
+  "peerDependencies": {
+    "better-dom": "^3.0.0"
   },
   "devDependencies": {
-    "grunt": "0.4.1",
-    "grunt-contrib-jshint": "0.5.4",
-    "grunt-contrib-watch": "0.4.3",
-    "grunt-karma": "0.7.1",
-    "karma-coverage": "0.1.0",
-    "grunt-github-publish": "~0.1.1",
-    "grunt-shell": "~0.6.0"
+    "better-dom-boilerplate": "git://github.com/chemerisuk/better-dom-boilerplate.git"
+  },
+  "config": {
+    "gulp": "--gulpfile node_modules/better-dom-boilerplate/gulpfile.js --cwd ."
+  },
+  "scripts": {
+    "test": "gulp test $npm_package_config_gulp",
+    "start": "gulp dev $npm_package_config_gulp",
+    "version": "gulp dist $npm_package_config_gulp && git add -A dist bower.json",
+    "postversion": "git push && git push --tags",
+    "publish": "gulp gh-pages $npm_package_config_gulp"
   }
 }
