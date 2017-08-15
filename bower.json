@@ -1,6 +1,6 @@
 {
   "name": "better-elastic-textarea",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": [
     "dist/better-elastic-textarea.js"
   ],

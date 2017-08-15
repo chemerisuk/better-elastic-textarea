@@ -1,6 +1,6 @@
 /**
  * better-elastic-textarea: Elastic textarea for better-dom
- * @version 1.2.0 Tue, 15 Aug 2017 13:24:30 GMT
+ * @version 1.2.1 Tue, 15 Aug 2017 13:41:28 GMT
  * @link https://github.com/chemerisuk/better-elastic-textarea
  * @copyright 2017 Maksim Chemerisuk
  * @license MIT
