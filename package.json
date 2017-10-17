@@ -13,9 +13,6 @@
     "ecosystem:better-dom",
     "web-components"
   ],
-  "peerDependencies": {
-    "better-dom": "3 - 4"
-  },
   "devDependencies": {
     "better-dom-boilerplate": "git://github.com/chemerisuk/better-dom-boilerplate.git"
   },
